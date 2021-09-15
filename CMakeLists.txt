@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
-project(redis-3.0-annotated-cmake VERSION 3.0)
+project(redis-3.0_note VERSION 3.0)
 
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type defined; defaulting to 'Debug'")
@@ -87,4 +87,34 @@ target_link_libraries(redis-cli
         PRIVATE hiredis
         )
 
-link_directories(deps/hiredis/ deps/linenoise/ diredeps/lua/src)
+link_directories(deps/hiredis/ deps/linenoise/ deps/lua/src)
+
+#if (REDIS_NOTE_TEST)
+#    add_definitions(-DZIPLIST_TEST_MAIN)
+#    set(SRC_ZIPLIST_TEST src/zmalloc.c src/sds.c src/util.c src/endianconv.c src/ziplist.c src/t_list.c
+#            src/sha1.c src/crc64.c src/bio.c)
+##    set(SRC_ZIPLIST_TEST
+##            src/adlist.c src/ae.c src/anet.c src/dict.c src/sds.c src/zmalloc.c
+##            src/lzf_c.c src/lzf_d.c src/pqsort.c src/zipmap.c src/sha1.c src/ziplist.c src/release.c src/networking.c
+##            src/util.c src/object.c src/db.c src/replication.c src/rdb.c src/t_string.c src/t_list.c src/t_set.c src/t_zset.c
+##            src/t_hash.c src/config.c src/aof.c src/pubsub.c src/multi.c src/debug.c src/sort.c src/intset.c src/syncio.c
+##            src/cluster.c src/crc16.c src/endianconv.c src/slowlog.c src/scripting.c src/bio.c src/rio.c src/rand.c src/memtest.c
+##            src/crc64.c src/bitops.c src/sentinel.c src/notify.c src/setproctitle.c src/blocked.c src/hyperloglog.c
+##            )
+#
+#    add_executable(ziplist_test ${SRC_ZIPLIST_TEST})
+#
+#    target_include_directories(ziplist_test
+#            PRIVATE ${REDIS_ROOT}/deps/hiredis
+#            PRIVATE ${REDIS_ROOT}/deps/linenoise
+#            # PRIVATE ${REDIS_ROOT}/deps/jemalloc
+#            PRIVATE ${REDIS_ROOT}/deps/lua/src
+#            )
+#
+#    target_link_libraries(ziplist_test
+#            PRIVATE pthread
+#            PRIVATE m
+#            PRIVATE linenoise
+#            PRIVATE hiredis
+#            )
+#endif ()

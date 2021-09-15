@@ -196,7 +196,9 @@ int zslRandomLevel(void) {
  * T_wrost = O(N^2), T_avg = O(N log N)
  */
 zskiplistNode *zslInsert(zskiplist *zsl, double score, robj *obj) {
+    /* update 记录将要和新节点相连接的节点*/
     zskiplistNode *update[ZSKIPLIST_MAXLEVEL], *x;
+    /* 记录 header 到新节点记录沿途跨越了多少个节点（即沿途的span值） */
     unsigned int rank[ZSKIPLIST_MAXLEVEL];
     int i, level;
 

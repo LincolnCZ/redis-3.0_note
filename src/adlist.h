@@ -73,13 +73,13 @@ typedef struct list {
     // 表尾节点
     listNode *tail;
 
-    // 节点值复制函数
+    // 节点值复制函数 -- 用于复制链表节点所保存的值
     void *(*dup)(void *ptr);
 
-    // 节点值释放函数
+    // 节点值释放函数 -- 用于释放链表节点所保存的值
     void (*free)(void *ptr);
 
-    // 节点值对比函数
+    // 节点值对比函数 -- 用于对比链表节点所保存的值和另一个输入值是否相等
     int (*match)(void *ptr, void *key);
 
     // 链表所包含的节点数量
@@ -128,20 +128,31 @@ typedef struct list {
 #define listGetMatchMethod(l) ((l)->match)
 
 /* Prototypes */
+// 创建个不包含任何节点的新链表。T = O(1)
 list *listCreate(void);
+// 释放给定链表，以及链表中的所有节点。T = O(N)，N为链表长度
 void listRelease(list *list);
+// 将一个包含给定值的新节点添加到给定链表的表头。T = O(1)
 list *listAddNodeHead(list *list, void *value);
+// 将一个包含给定值的新节点添加到给定链表的表尾。T = O(1)
 list *listAddNodeTail(list *list, void *value);
+// 将一个包含给定值的新节点添加到给定节点的之前或者之后。T = O(1)
 list *listInsertNode(list *list, listNode *old_node, void *value, int after);
+// 从链表中删除给定节点。T = O(N)，N为链表长度
 void listDelNode(list *list, listNode *node);
 listIter *listGetIterator(list *list, int direction);
 listNode *listNext(listIter *iter);
 void listReleaseIterator(listIter *iter);
+// 复制一个给定链表的副本。T = O(N)，N为链表长度
 list *listDup(list *orig);
+// 查找并返回链表中包含给定值的节点。T = O(N)，N为链表长度
 listNode *listSearchKey(list *list, void *key);
+// 返回链表在给定索引上的节点。T = O(N)，N为链表长度
 listNode *listIndex(list *list, long index);
 void listRewind(list *list, listIter *li);
 void listRewindTail(list *list, listIter *li);
+// 将链表的表尾节点弹出，然后将被弹出的节点插入到链表的表头，成为新的表头节点。
+// T = O(1)
 void listRotate(list *list);
 
 /* Directions for iterators 

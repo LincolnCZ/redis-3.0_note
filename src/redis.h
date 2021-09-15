@@ -169,25 +169,25 @@
 
 /* Object types */
 // 对象类型
-#define REDIS_STRING 0
-#define REDIS_LIST 1
-#define REDIS_SET 2
-#define REDIS_ZSET 3
-#define REDIS_HASH 4
+#define REDIS_STRING 0 // 字符串对象
+#define REDIS_LIST 1   // 列表对象
+#define REDIS_SET 2    // 集合对象
+#define REDIS_ZSET 3   // 有序集合对象
+#define REDIS_HASH 4   // 哈希对象
 
 /* Objects encoding. Some kind of objects like Strings and Hashes can be
  * internally represented in multiple ways. The 'encoding' field of the object
  * is set to one of this fields for this object. */
 // 对象编码
-#define REDIS_ENCODING_RAW 0     /* Raw representation */
-#define REDIS_ENCODING_INT 1     /* Encoded as integer */
-#define REDIS_ENCODING_HT 2      /* Encoded as hash table */
+#define REDIS_ENCODING_RAW 0     /* Raw representation */ /*简单动态字符串*/
+#define REDIS_ENCODING_INT 1     /* Encoded as integer */ /*long 类型的整数*/
+#define REDIS_ENCODING_HT 2      /* Encoded as hash table */ /*字典*/
 #define REDIS_ENCODING_ZIPMAP 3  /* Encoded as zipmap */
-#define REDIS_ENCODING_LINKEDLIST 4 /* Encoded as regular linked list */
-#define REDIS_ENCODING_ZIPLIST 5 /* Encoded as ziplist */
-#define REDIS_ENCODING_INTSET 6  /* Encoded as intset */
-#define REDIS_ENCODING_SKIPLIST 7  /* Encoded as skiplist */
-#define REDIS_ENCODING_EMBSTR 8  /* Embedded sds string encoding */
+#define REDIS_ENCODING_LINKEDLIST 4 /* Encoded as regular linked list */ /*双端链表*/
+#define REDIS_ENCODING_ZIPLIST 5 /* Encoded as ziplist */ /*压缩列表*/
+#define REDIS_ENCODING_INTSET 6  /* Encoded as intset */  /*整数列表*/
+#define REDIS_ENCODING_SKIPLIST 7  /* Encoded as skiplist */ /*跳跃表和字典*/
+#define REDIS_ENCODING_EMBSTR 8  /* Embedded sds string encoding */ /*embstr 编码的简单动态字符串*/
 
 /* Defines related to the dump file format. To store 32 bits lengths for short
  * keys requires a lot of space, so we check the most significant 2 bits of
@@ -563,7 +563,7 @@ typedef struct readyList {
 typedef struct redisClient {
 
     // 套接字描述符
-    int fd;
+    int fd; /*connfd 已连接套接字描述符；伪客户端的fd为-1*/
 
     // 当前正在使用的数据库
     redisDb *db;
@@ -587,7 +587,7 @@ typedef struct redisClient {
     robj **argv;
 
     // 记录被客户端执行的命令
-    struct redisCommand *cmd, *lastcmd;
+    struct redisCommand *cmd, *lastcmd; /*命令的实现函数*/
 
     // 请求的类型：内联命令还是多条命令
     int reqtype;
@@ -599,7 +599,7 @@ typedef struct redisClient {
     long bulklen;           /* length of bulk argument in multi bulk request */
 
     // 回复链表
-    list *reply;
+    list *reply; /*可变大小的输出缓冲区*/
 
     // 回复链表中对象的总大小
     unsigned long reply_bytes; /* Tot bytes of objects in reply list */
@@ -609,9 +609,10 @@ typedef struct redisClient {
                                buffer or object being sent. */
 
     // 创建客户端的时间
-    time_t ctime;           /* Client creation time */
+    time_t ctime;           /* Client creation time */ /*可以用来计算客户端与服务器已经连接了多少秒*/
 
     // 客户端最后一次和服务器互动的时间
+    /*可以用来计算客户端空转（idle）时间*/
     time_t lastinteraction; /* time of the last interaction, used for timeout */
 
     // 客户端的输出缓冲区超过软性限制的时间
@@ -678,6 +679,7 @@ typedef struct redisClient {
     // 回复偏移量
     int bufpos;
     // 回复缓冲区
+    /*输出缓冲区，固定大小，REDIS_REPLY_CHUNK_BYTES 为16k*/
     char buf[REDIS_REPLY_CHUNK_BYTES];
 
 } redisClient;
@@ -719,18 +721,26 @@ typedef struct zskiplistNode {
     robj *obj;
 
     // 分值
+    // 在跳跃表中，节点按各自所保存的分值从小到大排列。
     double score;
 
-    // 后退指针
+    // 后退指针，它指向位于当前节点的前一个节点。
+    // 后退指针在程序从表尾向表头遍历时使用。
     struct zskiplistNode *backward;
 
     // 层
+    // 节点中用 L1、L2、L3 等字样标记节点的各个层，L1 代表第一层，L2 代表第二层，以此类推。
+    // 每个层都带有两个属性：前进指针和跨度。
+    // 前进指针用于访问位于表尾方向的其他节点，而跨度则记录了前进指针所指向节点和当前节点的距离。
+    // 在上面的图片中，连线上带有数字的箭头就代表前进指针，而那个数字就是跨度。当程序从表头向表尾进行遍历时，访问会沿着层的前进指针进行。
     struct zskiplistLevel {
 
         // 前进指针
         struct zskiplistNode *forward;
 
         // 跨度
+        // 跨度实际上是用来计算排位 (rank)的：在查找某个节点的过程中，将沿途访问过的所有层的跨度累计起来，
+        // 得到的结果就是目标节点在跳跃表中的排位 。
         unsigned int span;
 
     } level[];
@@ -745,10 +755,10 @@ typedef struct zskiplist {
     // 表头节点和表尾节点
     struct zskiplistNode *header, *tail;
 
-    // 表中节点的数量
+    // 记录跳跃表的长度，也即是，跳跃表目前包含节点的数量（表头节点不计算在内）
     unsigned long length;
 
-    // 表中层数最大的节点的层数
+    // 记录目前跳跃表内，层数最大的那个节点的层数（表头节点的层数不计算在内）
     int level;
 
 } zskiplist;
@@ -1726,18 +1736,31 @@ typedef struct {
     int minex, maxex; /* are min or max exclusive? */
 } zlexrangespec;
 
+// 创建一个新的跳跃表。
+// T = O(N)
 zskiplist *zslCreate(void);
+// 释放给定跳跃表，以及表中包含的所有节点。
+// T = O(N)
 void zslFree(zskiplist *zsl);
+// 将包含给定成员和分值的新节点添加到跳跃表中。
+// T = 平均 O(logN)，最坏O(N)，N 为跳跃表长度
 zskiplistNode *zslInsert(zskiplist *zsl, double score, robj *obj);
 unsigned char *zzlInsert(unsigned char *zl, robj *ele, double score);
+// 删除跳跃表中包含给定成员和分值的节点。
+// T = 平均 O(logN)，最坏O(N)，N 为跳跃表长度
 int zslDelete(zskiplist *zsl, double score, robj *obj);
+// 给定一个分值范围，返回跳跃表中第一个符合这个范围的节点。
+// T = 平均 O(logN)，最坏O(N)，N 为跳跃表长度
 zskiplistNode *zslFirstInRange(zskiplist *zsl, zrangespec *range);
+// 给定一个分值范围，返回跳跃表中最后一个符合这个范围的节点。
+// T = 平均 O(logN)，最坏O(N)，N 为跳跃表长度
 zskiplistNode *zslLastInRange(zskiplist *zsl, zrangespec *range);
 double zzlGetScore(unsigned char *sptr);
 void zzlNext(unsigned char *zl, unsigned char **eptr, unsigned char **sptr);
 void zzlPrev(unsigned char *zl, unsigned char **eptr, unsigned char **sptr);
 unsigned int zsetLength(robj *zobj);
 void zsetConvert(robj *zobj, int encoding);
+// 返回包含给定成员和分值的节点在跳跃表中的排位。T = 平均 O(logN)，最坏O(N)，N 为跳跃表长度
 unsigned long zslGetRank(zskiplist *zsl, double score, robj *o);
 
 /* Core functions */

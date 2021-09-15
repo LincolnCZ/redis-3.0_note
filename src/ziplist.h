@@ -31,16 +31,40 @@
 #define ZIPLIST_HEAD 0
 #define ZIPLIST_TAIL 1
 
+// 创建一个新的压缩列表
+// T = O(1)
 unsigned char *ziplistNew(void);
+// 创建一个包含给定值的新节点，并将这个新节点添加到压缩列表的表头或者表尾
+// T = 平均O(N)， 最坏O(N^2 )
 unsigned char *ziplistPush(unsigned char *zl, unsigned char *s, unsigned int slen, int where);
+// 返回压缩列表给定索引上的节点
+// T = O(N)
 unsigned char *ziplistIndex(unsigned char *zl, int index);
+// 返回给定节点的下一个节点
+// T = O(1)
 unsigned char *ziplistNext(unsigned char *zl, unsigned char *p);
+// 返回给定节点的前一个节点
+// T = O(1)
 unsigned char *ziplistPrev(unsigned char *zl, unsigned char *p);
+// 获取给定节点所保存的值
+// T = O(1)
 unsigned int ziplistGet(unsigned char *p, unsigned char **sval, unsigned int *slen, long long *lval);
+// 将包含给定值的新节点插入到给定节点之后
+// T = 平均O(N)， 最坏O(N^2 )
 unsigned char *ziplistInsert(unsigned char *zl, unsigned char *p, unsigned char *s, unsigned int slen);
+// 从压缩列表中删除给定的节点
+// T = 平均O(N)， 最坏O(N^2 )
 unsigned char *ziplistDelete(unsigned char *zl, unsigned char **p);
+// 删除压缩列表在给定索引上的连续多个 节点
+// T = 平均O(N)， 最坏O(N^2 )
 unsigned char *ziplistDeleteRange(unsigned char *zl, unsigned int index, unsigned int num);
 unsigned int ziplistCompare(unsigned char *p, unsigned char *s, unsigned int slen);
+// 在压缩列表中查找并返回包含了给定值的节点
+// 因为节点的值可能是一个字节数组，所以检查节点值和给定值是否相同的复杂度为 O(N)，而查找整个列表的复杂度则为 O(N^2)
 unsigned char *ziplistFind(unsigned char *p, unsigned char *vstr, unsigned int vlen, unsigned int skip);
+// 返回压缩列表目前包含的节点数量
+// 节点数量小于 65535 时为 O(1) ，大于 65535 时为O(N^2)
 unsigned int ziplistLen(unsigned char *zl);
+// 返回压缩列表目前占用的内存字节数
+// T = O(1)
 size_t ziplistBlobLen(unsigned char *zl);

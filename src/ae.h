@@ -47,9 +47,13 @@
 // 未设置
 #define AE_NONE 0
 // 套接字可读  /*对应 epoll 中的 EPOLLIN*/
-#define AE_READABLE 1 /*1.客户端对套接字执行write操作 2.客户端对套接字执行close操作 3.客户端对服务器监听的套接字执行connect操作*/
+/*1.客户端对套接字执行write操作 2.客户端对套接字执行close操作
+ * 3.客户端对服务器监听的套接字执行connect操作*/
+#define AE_READABLE 1
 // 套接字可写  /*对应 epoll 中的 EPOLLOUT EPOLLERR EPOLLHUP*/
-#define AE_WRITABLE 2 /*1.客户端对套接字执行read操作*/
+/*1.客户端对套接字执行read操作（即，服务器端执行write操作）。
+ * 注意：只有在有需要执行write操作的时候才设置，其他时候应该关闭*/
+#define AE_WRITABLE 2
 
 /*
  * 时间处理器的执行 flags

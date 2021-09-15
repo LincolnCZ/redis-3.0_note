@@ -324,13 +324,13 @@ typedef struct zlentry {
     unsigned int prevrawlensize; /* Bytes used to encode the previous entry len*/
     unsigned int prevrawlen;     /* Previous entry len. */
 
-    // len ：当前节点值的长度
     // lensize ：编码 len 所需的字节大小
     //    字节数组时：1 2 5
     //    整数时：1, 2, 3, 4, 8 or 0 (for 4 bit immediate)
     unsigned int lensize;        /* Bytes used to encode this entry type/len.
                                     For example strings have a 1, 2 or 5 bytes
                                     header. Integers always use a single byte.*/
+    // len ：当前节点值的长度
     unsigned int len;            /* Bytes used to represent the actual entry.
                                     For strings this is just the string length
                                     while for integers it is 1, 2, 3, 4, 8 or

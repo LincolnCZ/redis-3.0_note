@@ -67,6 +67,7 @@ typedef struct dictEntry {
     void *key;
 
     // 值
+    // 值可以是一个指针，或者是一个 uint64_t 整数，又或者是一个 int64_t 整数。
     union {
         void *val;
         uint64_t u64;
@@ -74,6 +75,7 @@ typedef struct dictEntry {
     } v;
 
     // 指向下个哈希表节点，形成链表
+    // 这个指针可以将多个哈希值相同的键值对连接在一次，以此来解决键冲突(collision)的问题。
     struct dictEntry *next;
 
 } dictEntry;
@@ -148,6 +150,7 @@ typedef struct dict {
     int rehashidx; /* rehashing not in progress if rehashidx == -1 */
 
     // 目前正在运行的安全迭代器的数量
+    /*没有安全迭代器的情况下，可以对字典进行单步rehash；有安全迭代器的情况下，不行*/
     int iterators; /* number of iterators currently running */
 
 } dict;
@@ -252,22 +255,31 @@ typedef void (dictScanFunction)(void *privdata, const dictEntry *de);
 #define dictIsRehashing(ht) ((ht)->rehashidx != -1)
 
 /* API */
+// 创建一个新的字典。T = O(1)
 dict *dictCreate(dictType *type, void *privDataPtr);
 int dictExpand(dict *d, unsigned long size);
+// 将给定的键值对添加到字典里面。T = O(1)
 int dictAdd(dict *d, void *key, void *val);
 dictEntry *dictAddRaw(dict *d, void *key);
+// 将给定的键值对添加到字典里面.如果键已经 存在于字典 ，那么用新值取代原有的值。
+// T = O(1)
 int dictReplace(dict *d, void *key, void *val);
 dictEntry *dictReplaceRaw(dict *d, void *key);
+// 从字典中删除给定键所对应的键值对。T = O(1)
 int dictDelete(dict *d, const void *key);
 int dictDeleteNoFree(dict *d, const void *key);
+// 释放给定字典，以及字典中包含的所有键值对。
+// T = o(N)，N为字典包含的键值对数量
 void dictRelease(dict *d);
 dictEntry * dictFind(dict *d, const void *key);
+// 返回给定键的值。T = O(1)
 void *dictFetchValue(dict *d, const void *key);
 int dictResize(dict *d);
 dictIterator *dictGetIterator(dict *d);
 dictIterator *dictGetSafeIterator(dict *d);
 dictEntry *dictNext(dictIterator *iter);
 void dictReleaseIterator(dictIterator *iter);
+// 从字典中随机返回一个键值对。T = O(1)
 dictEntry *dictGetRandomKey(dict *d);
 int dictGetRandomKeys(dict *d, dictEntry **des, int count);
 void dictPrintStats(dict *d);
