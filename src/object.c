@@ -242,7 +242,7 @@ robj *createZiplistObject(void) {
 }
 
 /*
- * 创建一个 SET 编码的集合对象
+ * 创建一个 REDIS_ENCODING_HT 编码的集合对象
  */
 robj *createSetObject(void) {
 

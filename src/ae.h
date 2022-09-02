@@ -176,7 +176,7 @@ typedef struct aeEventLoop {
     aeFileEvent *events; /* Registered events */ /*数组，初始大小为setsize决定。数组的index为fd。*/
 
     // 已就绪的文件事件
-    aeFiredEvent *fired; /* Fired events */
+    aeFiredEvent *fired; /* Fired events */ /*数组，初始大小为setsize决定。*/
 
     // 时间事件
     aeTimeEvent *timeEventHead; /*链表头*/

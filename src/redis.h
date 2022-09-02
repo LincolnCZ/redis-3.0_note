@@ -669,9 +669,7 @@ typedef struct redisClient {
     // 也即是，一个频道的集合
     dict *pubsub_channels;  /* channels a client is interested in (SUBSCRIBE) */
 
-    // 链表，包含多个 pubsubPattern 结构
-    // 记录了所有订阅频道的客户端的信息
-    // 新 pubsubPattern 结构总是被添加到表尾
+    // 链表，包含多个模式订阅的频道
     list *pubsub_patterns;  /* patterns a client is interested in (SUBSCRIBE) */
     sds peerid;             /* Cached peer ID. */
 
